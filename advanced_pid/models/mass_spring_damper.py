@@ -6,9 +6,8 @@ Created on Fri Jun 24 15:10:31 2022
 @author: eadali
 """
 
-from numpy import asarray, random
-from scipy.integrate import solve_ivp
-from advanced_pid.integrate import RK4
+from numpy import random
+from advanced_pid.integrate import asarray, RK4
 
 
 class MassSpringDamper:
