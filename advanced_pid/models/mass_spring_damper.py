@@ -30,7 +30,7 @@ class MassSpringDamper:
         Standart deviation of measurement noise
     """
 
-    def __init__(self, mass, spring_const, damping_const, noise_std=0.01):
+    def __init__(self, mass, spring_const, damping_const, noise_std=0.02):
         # Set model parameters
         self.mass = mass
         self.spring_const = spring_const
@@ -95,5 +95,7 @@ class MassSpringDamper:
                              (0.0, self.time_step),
                              self.states)
         self.states = solution.y[:, -1]
-        measured_position = self.states[0] #+ random
+        position = self.states[0]
+        noise = random.normal(scale=self.noise_std)
+        measured_position = position + noise
         return self.measurement_time, measured_position
