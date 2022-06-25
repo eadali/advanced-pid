@@ -6,15 +6,15 @@ Created on Fri Jun 24 15:10:31 2022
 @author: eadali
 """
 
-from numpy import random
-from advanced_pid.integrate import asarray, RK4
+from numpy import zeros, random
+from advanced_pid.integrate import RK4
 
 
 class MassSpringDamper:
-    """
+    r"""
     A mass-spring-damper model.
 
-    Solve a differential equation:math:`mx''(t) = -kx(t) - bx'(t) - u`
+    Solve a differential equation :math:`m\ddot{x} = -kx - b\dot{x} - u`
 
     *Note*: https://en.wikipedia.org/wiki/Mass-spring-damper_model
 
@@ -27,24 +27,24 @@ class MassSpringDamper:
     damping_const : float
         Damping constant.
     noise_std : float
-        Standart deviation of measurement noise
+        Standart deviation of measurement noise.
     """
 
     def __init__(self, mass, spring_const, damping_const, noise_std=0.02):
+        # Set initial time and time step
+        self.measurement_time, self.time_step = 0.0, 0.01
         # Set model parameters
         self.mass = mass
         self.spring_const = spring_const
         self.damping_const = damping_const
         self.noise_std = noise_std
         # Set initial values
-        self.states = asarray([0.0, 0.0])
-        # Set initial time and time step
-        self.measurement_time, self.time_step = 0.0, 0.01
+        self.states = zeros(2)
         # Set input
         self.external_force = 0.0
 
     def set_initial_value(self, initial_position, initial_velocity):
-        """Set mass-spring-damper system states.
+        """Set mass-spring-damper model states.
 
         Parameters
         ----------
@@ -62,11 +62,11 @@ class MassSpringDamper:
         spring_acceleration = (self.spring_const / self.mass) * position
         damper_acceleration = (self.damping_const / self.mass) * velocity
         external_acceleration = (1.0 / self.mass) * self.external_force
-        dxdt = [velocity,
-                (- spring_acceleration
-                 - damper_acceleration
-                 + external_acceleration)]
-        return asarray(dxdt)
+        acceleration = (- spring_acceleration
+                        - damper_acceleration
+                        + external_acceleration)
+        dxdt = [velocity, acceleration]
+        return dxdt
 
     def set_input(self, external_force):
         """Set external force.
@@ -88,14 +88,13 @@ class MassSpringDamper:
         measured_position : float
             Measured position of mass.
         """
-        # Update model time
+        # Update measurement time
         self.measurement_time = self.measurement_time + self.time_step
-        # Solve differential equation for current states
-        t, y = RK4(self._state_equation,
-                   (0.0, self.time_step),
-                   self.states,
-                   10)
-        self.states = y
+        # Solve ordinary differential equation for current states
+        _, self.states = RK4(self._state_equation,
+                             (0.0, self.time_step),
+                             self.states,
+                             10)
         position = self.states[0]
         noise = random.normal(scale=self.noise_std)
         measured_position = position + noise
