@@ -10,7 +10,7 @@ from distutils.core import setup
 setup(
   name = 'advanced-pid',
   packages = ['advanced_pid', 'advanced_pid.integrate', 'advanced_pid.models'],
-  version = '0.0.3',
+  version = '0.0.4',
   license='MIT',
   description = 'An advanced PID controller in Python.',
   long_description='An advanced PID controller in Python. The derivative term can also be used in real applications thanks to built-in first-order filter.',
