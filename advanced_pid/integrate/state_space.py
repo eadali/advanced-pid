@@ -6,7 +6,7 @@ Created on Mon Jun 20 16:08:06 2022
 @author: eadali
 """
 
-from numpy import isscalar, array
+from numpy import isscalar, array, zeros
 
 def clamp(x, lower, upper):
     return min(upper, max(x, lower))
@@ -63,67 +63,36 @@ def pid2ss(Kp, Ki, Kd, Tf):
     return A, B, C, D
 
 
-class ODE:
-    """
-    A generic interface class to numeric integrators.
-
-    Solve an equation system :math:`y'(t) = f(y)`.
-
-    *Note*: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+def RK4(fun, t_span, y0, n):
+    """Find y=y(t), set y as an initial condition, and return y.
 
     Parameters
     ----------
-    f : callable ``f(y, *f_args)``
-        Right-hand side of the differential equation. t is a scalar,
-        ``y.shape == (n,)``.
-        ``f_args`` is set by calling ``set_f_params(*args)``.
-        `f` should return a scalar, array or list (not a tuple).
-
-    Attributes
-    ----------
     t : float
-        Current time.
+        The endpoint of the integration step.
+
+    Returns
+    -------
     y : ndarray
-        Current variable values.
-
+        The integrated value at t
     """
+    t0, tf = t_span
+    t = t0
+    y = asarray(y0)
 
-    def __init__(self, f):
-        self.f = f
-
-    def set_initial_value(self, T0, Y0):
-        """Set initial conditions y(T0) = Y0."""
-        self.t = T0
-        self.y = asarray(Y0)
-
-    def set_f_params(self, *args):
-        """Set extra parameters for user-supplied function f."""
-        self.f_params = args
-
-    def integrate(self, t):
-        """Find y=y(t), set y as an initial condition, and return y.
-
-        Parameters
-        ----------
-        t : float
-            The endpoint of the integration step.
-
-        Returns
-        -------
-        y : ndarray
-            The integrated value at t
-        """
-        # Calculate step-size
-        h = t - self.t
+    # Calculate step-size
+    h = (tf - t0) / n
+    for i in range(n):
         # Calculate slopes
-        k1 = asarray(self.f(self.y,          *self.f_params))
-        k2 = asarray(self.f(self.y + h*k1/2, *self.f_params))
-        k3 = asarray(self.f(self.y + h*k2/2, *self.f_params))
-        k4 = asarray(self.f(self.y + h*k3,   *self.f_params))
+        k1 = asarray(fun(t,         y))
+        k2 = asarray(fun(t+(h/2.0), y + h * (k1/2.0)))
+        k3 = asarray(fun(t+(h/2.0), y + h * (k2/2.0)))
+        k4 = asarray(fun(t+h,       y + h * k3))
         # Update state and time
-        self.y = self.y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
-        self.t = self.t + h
-        return self.y
+        t = t + h
+        y = y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
+    return t, y
+
 
 
 class StateSpace:
@@ -143,18 +112,25 @@ class StateSpace:
     def __init__(self, A, B, C, D):
         self.A, self.B = asarray(A), asarray(B)
         self.C, self.D = asarray(C), asarray(D)
-        self.solver = ODE(self.__state_equation)
+        self.u = 0.0
+        self.t = 0.0
+        self.x = [0.0, 0.0, 0.0, 0.0]
+        # self.solver = ODE(self.__state_equation)
 
     def set_initial_value(self, T0, X0):
         """Set initial conditions x(T0) = X0."""
-        self.solver.set_initial_value(T0, asarray(X0))
+        self.t = T0
+        self.x = X0
+        # self.solver.set_initial_value(T0, asarray(X0))
 
-    def __state_equation(self, x, u):
+    def _state_equation(self, t, x):
         """State equation of state-space form."""
+        u = self.u
         return self.A.dot(x) + self.B.dot(u)
 
-    def __output_equation(self, x, u):
+    def _output_equation(self, t, x):
         """Output equation of state-space form."""
+        u = self.u
         return self.C.dot(x) + self.D.dot(u)
 
     def integrate(self, t, u):
@@ -170,7 +146,9 @@ class StateSpace:
         x : ndarray
             The integrated value at t
         """
-        u = asarray(u)
-        self.solver.set_f_params(u)
-        x = self.solver.integrate(t)
-        return self.__output_equation(x, u)
+        self.u = asarray(u)
+        self.t, self.x = RK4(self._state_equation,
+                             (self.t, t),
+                             self.x,
+                             10)
+        return self._output_equation(self.t, self.x)

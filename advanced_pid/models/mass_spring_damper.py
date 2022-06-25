@@ -8,6 +8,7 @@ Created on Fri Jun 24 15:10:31 2022
 
 from numpy import asarray, random
 from scipy.integrate import solve_ivp
+from advanced_pid.integrate import RK4
 
 
 class MassSpringDamper:
@@ -91,10 +92,11 @@ class MassSpringDamper:
         # Update model time
         self.measurement_time = self.measurement_time + self.time_step
         # Solve differential equation for current states
-        solution = solve_ivp(self._state_equation,
-                             (0.0, self.time_step),
-                             self.states)
-        self.states = solution.y[:, -1]
+        t, y = RK4(self._state_equation,
+                   (0.0, self.time_step),
+                   self.states,
+                   10)
+        self.states = y
         position = self.states[0]
         noise = random.normal(scale=self.noise_std)
         measured_position = position + noise
