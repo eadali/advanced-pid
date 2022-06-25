@@ -6,60 +6,94 @@ Created on Fri Jun 24 15:10:31 2022
 @author: eadali
 """
 
-from numpy import random
-from scipy.integrate import odeint
+from numpy import asarray, random
+from scipy.integrate import solve_ivp
+
 
 class MassSpringDamper:
-    def __init__(self, m, k, b, dt, std=0):
-        """Inits pendulum constants and initial state
-        # Arguments
-            m: Mass
-            k: Spring coeff
-            b: Friction coeff
-            x_0: Initial state
+    """
+    A mass-spring-damper model.
+
+    Solve a differential equation:math:`mx''(t) = -kx(t) - bx'(t) - u`
+
+    *Note*: https://en.wikipedia.org/wiki/Mass-spring-damper_model
+
+    Parameters
+    ----------
+    mass : float
+        Mass.
+    spring_const : float
+        Spring constant.
+    damping_const : float
+        Damping constant.
+    noise_std : float
+        Standart deviation of measurement noise
+    """
+
+    def __init__(self, mass, spring_const, damping_const, noise_std=0.01):
+        # Set model parameters
+        self.mass = mass
+        self.spring_const = spring_const
+        self.damping_const = damping_const
+        self.noise_std = noise_std
+        # Set initial values
+        self.states = asarray([0.0, 0.0])
+        # Set initial time and time step
+        self.measurement_time, self.time_step = 0.0, 0.01
+        # Set input
+        self.external_force = 0.0
+
+    def set_initial_value(self, initial_position, initial_velocity):
+        """Set mass-spring-damper system states.
+
+        Parameters
+        ----------
+        initial_position : float
+            Initial position of mass.
+        initial_velocity : float
+            Initial velocity of mass.
         """
-        self.dt = dt
-        self.t = 0.0
-        self.x= [0.0, 0.0]
-        
-        self.m = m
-        self.k = k
-        self.b = b
-        self.std = std
+        self.states[0] = initial_position
+        self.states[1] = initial_velocity
 
-    def set_initial_value(self, t0, x0):
-        self.t = t0
-        self.x = x0
-
-    def ode(self, x, t, u):
-        """Dynamic equations of pendulum
-        # Arguments
-            x: [position of mass, velocity of mass]
-            t: Time steps for ode solving
-            u: External force applied to the mass
-        # Returns
-            Derivative of internal states
-        """
-
-        # ODE of mass-spring-damper model
-        position, velocity = x
+    def _state_equation(self, _, states):
+        """State equation of state-space form."""
+        position, velocity = states
+        spring_acceleration = (self.spring_const / self.mass) * position
+        damper_acceleration = (self.damping_const / self.mass) * velocity
+        external_acceleration = (1.0 / self.mass) * self.external_force
         dxdt = [velocity,
-                -(self.b/self.m)*velocity - (self.k/self.m)*position + (1/self.m)*u]
+                (- spring_acceleration
+                 - damper_acceleration
+                 + external_acceleration)]
+        return asarray(dxdt)
 
-        return dxdt
+    def set_input(self, external_force):
+        """Set external force.
 
-    def set_input(self, u):
-        """Interface function for pendulum model
-        # Arguments
-            u: External force applied to the mass
-        # Returns
-            Position of mass
+        Parameters
+        ----------
+        external_force : float
+            External force is applied to mass.
         """
+        self.external_force = external_force
 
-        # Solving ODE with scipy library
-        self.x = odeint(self.ode, self.x, [0, self.dt], args=(u,))[1,:]
-        self.t = self.t + self.dt
-
-        
     def get_measurement(self):
-        return self.t, self.x[0] +random.randn()*0.01
+        """Get position measurement of mass.
+
+        Returns
+        -------
+        measurement_time : float
+            Measurement timestamp.
+        measured_position : float
+            Measured position of mass.
+        """
+        # Update model time
+        self.measurement_time = self.measurement_time + self.time_step
+        # Solve differential equation for current states
+        solution = solve_ivp(self._state_equation,
+                             (0.0, self.time_step),
+                             self.states)
+        self.states = solution.y[:, -1]
+        measured_position = self.states[0] #+ random
+        return self.measurement_time, measured_position
