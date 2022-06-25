@@ -36,8 +36,8 @@ from advanced_pid import PID
 from advanced_pid.models import MassSpringDamper
 
 # Create a mass-spring-damper system model
-system = MassSpringDamper(m=1, k=1, b=0.2, dt=0.01, std=0.00001)
-system.set_initial_value(0.0, [1.0, 0.0])
+system = MassSpringDamper(mass=1.0, spring_const=1.0, damping_const=0.2)
+system.set_initial_value(initial_position=1.0, initial_velocity=0.0)
 
 # Create PID controller 
 pid = PID(Kp=1.0, Ki=0.0, Kd=2.0, Tf=0.5)
