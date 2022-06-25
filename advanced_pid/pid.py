@@ -7,7 +7,7 @@ Created on Wed Jun 22 20:06:38 2022
 """
 
 from warnings import warn
-from advanced_pid.integrate import pid2ss, StateSpace, clamp
+from advanced_pid.integrate import pid2ss, StateSpace, clip
 
 
 class PID:
@@ -172,5 +172,5 @@ class PID:
         
 
         lower, upper = self._output_limits
-        self.set_initial_value(t, e, clamp(i, lower, upper))
-        return clamp(u, lower, upper)
+        self.set_initial_value(t, e, clip(i, lower, upper))
+        return clip(u, lower, upper)

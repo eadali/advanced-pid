@@ -6,10 +6,7 @@ Created on Mon Jun 20 16:08:06 2022
 @author: eadali
 """
 
-from numpy import isscalar, array
-
-def clamp(x, lower, upper):
-    return min(upper, max(x, lower))
+from numpy import isscalar, array, zeros, clip
 
 
 def asarray(x):
@@ -18,7 +15,7 @@ def asarray(x):
     Parameters
     ----------
     x : array_like
-        TInput data, in any form that can be converted to an array.
+        Input data, in any form that can be converted to an array.
 
     Returns
     -------
@@ -63,67 +60,42 @@ def pid2ss(Kp, Ki, Kd, Tf):
     return A, B, C, D
 
 
-class ODE:
-    """
-    A generic interface class to numeric integrators.
-
-    Solve an equation system :math:`y'(t) = f(y)`.
-
-    *Note*: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+def RK4(fun, t_span, y0, n):
+    """Explicit Runge-Kutta method of order 4.
 
     Parameters
     ----------
-    f : callable ``f(y, *f_args)``
-        Right-hand side of the differential equation. t is a scalar,
-        ``y.shape == (n,)``.
-        ``f_args`` is set by calling ``set_f_params(*args)``.
-        `f` should return a scalar, array or list (not a tuple).
+    fun : callable
+        Right-hand side of the system. The calling signature is fun(t, y).
+    t_span : array_like
+        Interval of integration (t0, tf).
+    y0 : array_like
+        Initial state.
+    n : int
+        Number of integration steps.
 
-    Attributes
-    ----------
+    Returns
+    -------
     t : float
-        Current time.
+        Integration end time.
     y : ndarray
-        Current variable values.
-
+        The integrated value at t
     """
-
-    def __init__(self, f):
-        self.f = f
-
-    def set_initial_value(self, T0, Y0):
-        """Set initial conditions y(T0) = Y0."""
-        self.t = T0
-        self.y = asarray(Y0)
-
-    def set_f_params(self, *args):
-        """Set extra parameters for user-supplied function f."""
-        self.f_params = args
-
-    def integrate(self, t):
-        """Find y=y(t), set y as an initial condition, and return y.
-
-        Parameters
-        ----------
-        t : float
-            The endpoint of the integration step.
-
-        Returns
-        -------
-        y : ndarray
-            The integrated value at t
-        """
-        # Calculate step-size
-        h = t - self.t
+    # Integration initial and final time
+    t0, tf = t_span
+    t, y = t0, asarray(y0)
+    # Calculate step-size
+    h = (tf - t0) / n
+    for i in range(n):
         # Calculate slopes
-        k1 = asarray(self.f(self.y,          *self.f_params))
-        k2 = asarray(self.f(self.y + h*k1/2, *self.f_params))
-        k3 = asarray(self.f(self.y + h*k2/2, *self.f_params))
-        k4 = asarray(self.f(self.y + h*k3,   *self.f_params))
-        # Update state and time
-        self.y = self.y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
-        self.t = self.t + h
-        return self.y
+        k1 = asarray(fun(t,         y))
+        k2 = asarray(fun(t+(h/2.0), y + h * (k1/2.0)))
+        k3 = asarray(fun(t+(h/2.0), y + h * (k2/2.0)))
+        k4 = asarray(fun(t+h,       y + h * k3))
+        # Update time and states
+        t = t + h
+        y = y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
+    return t, y
 
 
 class StateSpace:
@@ -141,21 +113,27 @@ class StateSpace:
     """
 
     def __init__(self, A, B, C, D):
+        # Create time
+        self.t = None
+        # Create state-space form matrices
         self.A, self.B = asarray(A), asarray(B)
         self.C, self.D = asarray(C), asarray(D)
-        self.solver = ODE(self.__state_equation)
+        # Create states
+        self.x = zeros(self.A.shape[0])
+        # Create input
+        self.u = None
 
-    def set_initial_value(self, T0, X0):
-        """Set initial conditions x(T0) = X0."""
-        self.solver.set_initial_value(T0, asarray(X0))
+    def set_initial_value(self, t0, x0):
+        """Set initial conditions x(t0) = x0."""
+        self.t, self.x = t0, x0
 
-    def __state_equation(self, x, u):
+    def _state_equation(self, _, x):
         """State equation of state-space form."""
-        return self.A.dot(x) + self.B.dot(u)
+        return self.A.dot(x) + self.B.dot(self.u)
 
-    def __output_equation(self, x, u):
+    def _output_equation(self, _, x):
         """Output equation of state-space form."""
-        return self.C.dot(x) + self.D.dot(u)
+        return self.C.dot(x) + self.D.dot(self.u)
 
     def integrate(self, t, u):
         """Find x=x(t), set x as an initial condition, and return x.
@@ -170,7 +148,13 @@ class StateSpace:
         x : ndarray
             The integrated value at t
         """
-        u = asarray(u)
-        self.solver.set_f_params(u)
-        x = self.solver.integrate(t)
-        return self.__output_equation(x, u)
+        # If first call, set current time
+        if self.t is None:
+            self.t = t
+        # Set input and solve ordinary differential equation
+        self.u = asarray(u)
+        self.t, self.x = RK4(self._state_equation,
+                             (self.t, t),
+                             self.x,
+                             10)
+        return self._output_equation(self.t, self.x)
