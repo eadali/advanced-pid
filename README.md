@@ -1,6 +1,6 @@
 # advanced-pid    
-An advanced PID controller in Python. The derivative term can also be used in real
-applications thanks to built-in first-order filter. Detailed information can be
+An advanced PID controller in Python. The derivative term can also be used in 
+practice thanks to built-in first-order filter. Detailed information can be
 found [here](https://en.wikipedia.org/wiki/PID_controller#Derivative_term).
 
 Usage is very simple:
@@ -24,10 +24,11 @@ while True:
     system.set_input(control)
 ```
 
-Complete API documentation can be found here.
+Complete API documentation can be found 
+[here](https://advanced-pid.readthedocs.io/en/latest/).
 
 ## Usage
-Biggest advantage of advance-pid, the derivative term has a built-in first-order
+Biggest advantage of advanced-pid, the derivative term has a built-in first-order
 filter.    
 advanced-pid package includes a toy mass-spring-damper system model for testing:
 
@@ -76,7 +77,7 @@ plt.show()
 ```
     
 Output:  
-<img src='./docs/figure.png' />
+<img src='./docs/imgs/figure.png' />
 
 ## Installation
 To install, run:
