@@ -77,7 +77,7 @@ plt.show()
 ```
     
 Output:  
-<img src='./docs/imgs/figure.png' />
+![alt text](https://raw.githubusercontent.com/eadali/advanced-pid/main/docs/imgs/figure.png)
 
 ## Installation
 To install, run:
