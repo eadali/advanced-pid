@@ -140,26 +140,10 @@ To install using pip
 
     pip install ddcontrol
 
-ddcontrol\.control module
+advanced_pid\.pid module
 -------------------------
 
-.. automodule:: ddcontrol.control
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddcontrol\.model module
------------------------
-
-.. automodule:: ddcontrol.model
-    :members:
-    :undoc-members:
-    :show-inheritance:    
-
-ddcontrol\.integrate module
----------------------------
-
-.. automodule:: ddcontrol.integrate
+.. automodule:: advanced_pid.pid
     :members:
     :undoc-members:
     :show-inheritance:
