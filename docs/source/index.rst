@@ -16,7 +16,7 @@ Complete API documentation
 ========================================
 
 advanced\_pid.PID module
-----------------------
+------------------------
 
 .. automodule:: advanced_pid.PID
     :members:

@@ -15,7 +15,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-
+sys.setrecursionlimit(1500)
 
 # -- Project information -----------------------------------------------------
 
@@ -72,7 +72,7 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -180,5 +180,7 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+intersphinx_mapping = {'https://docs.python.org/': None}
+
+napoleon_include_private_with_doc = True
 napoleon_include_special_with_doc = True
-napoleon_numpy_docstring = True
