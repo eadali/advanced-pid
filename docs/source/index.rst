@@ -7,18 +7,11 @@ Welcome to advanced-pid's documentation!
 ========================================
 
 .. mdinclude:: ../../README.md
+  
+advanced\_pid.PID module
+----------------------
 
-.. image:: ../imgs/figure.png 
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. automodule:: advanced_pid.PID
+    :members:
+    :undoc-members:
+    :show-inheritance:
