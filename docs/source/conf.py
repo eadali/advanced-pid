@@ -41,7 +41,8 @@ release = 'latest'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'm2r2'
+    'm2r2',
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -177,3 +178,6 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+intersphinx_mapping = {'https://docs.python.org/': None}
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = False

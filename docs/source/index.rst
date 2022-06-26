@@ -12,14 +12,16 @@ Welcome to advanced-pid's documentation!
 
 .. mdinclude:: ../../README.md
 
-
+|
+|
+|
 Complete API documentation
 ========================================
 
-advanced\_pid.PID module
+advanced_pid.PID module
 ------------------------
 
 .. automodule:: advanced_pid.PID
-    :members:
+    :members: __call__, set_gains, get_gains, set_output_limits, get_output_limits, set_initial_value, get_initial_value, integrate
     :undoc-members:
     :show-inheritance:
