@@ -11,6 +11,22 @@ from advanced_pid.integrate import pid2ss, StateSpace, clip
 
 
 class PID:
+    """
+    An advanced PID controller with first-order filter on derivative term.
+
+    Solve an equation system :math:`y'(t) = f(y)`.
+
+    *Note*: https://www.cds.caltech.edu/~murray/courses/cds101/fa04/caltech/am04_ch8-3nov04.pdf
+
+    Parameters
+    ----------
+    Kp, Ki, Kd : float
+        Proportional, Integral and Derivative gain.
+    Tf : float
+        Time constant of the first-order derivative filter.
+
+    """
+
     def __init__(self, Kp, Ki, Kd, Tf):
         # Crate Current time
         self._t = None

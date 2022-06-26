@@ -3,4 +3,3 @@ m2r2
 sphinxcontrib-napoleon
 bluepy
 numpy
-numpydoc

@@ -43,7 +43,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'm2r2',
     'sphinxcontrib.napoleon',
-    'numpydoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -179,4 +178,5 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+napoleon_include_special_with_doc = True
 napoleon_numpy_docstring = True
