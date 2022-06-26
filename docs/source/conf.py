@@ -41,7 +41,7 @@ release = 'latest'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'm2r',
+    'm2r2',
     'sphinxcontrib.napoleon'
 ]
 
