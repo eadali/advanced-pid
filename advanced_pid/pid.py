@@ -26,6 +26,7 @@ class PID:
         Derivative gain.
     Tf : float
         Time constant of the first-order derivative filter.
+         Derivative term will not be used if the value is not a positive number.
 
     """
 
@@ -64,12 +65,10 @@ class PID:
             Derivative gain.
         Tf : float
             Time constant of the first-order derivative filter.
+            Derivative term will not be used if the value is not
+             a positive number.
         """
         self.Kp, self.Ki, self.Kd, self.Tf = Kp, Ki, Kd, Tf
-        if not Tf > 0:
-            msg = """Tf value need to be a positive number.
-                     Derivative term will not be used."""
-            warn(msg, RuntimeWarning)
 
     def get_gains(self):
         """Get PID controller gains.
@@ -97,7 +96,7 @@ class PID:
         upper : flaot or None
             Upper limit for anti-windup.
         """
-        self.lower, upper = lower, upper
+        self.lower, self.upper = lower, upper
         # If limit is None, set limit to -inf/+inf
         if lower is None:
             self.lower = -inf
@@ -177,6 +176,7 @@ class PID:
             msg = """Current timestamp is smaller then previous timestamp.
                      Time step will be accepted as zero."""
             warn(msg, RuntimeWarning)
+
         # Calculate time step
         dt = t - t0
         # Calculate proportional term
@@ -185,13 +185,18 @@ class PID:
         i = i0 + dt * self.Ki * e
         i = clip(i, self.lower, self.upper)
         # Calcuate derivative term
-        d = 0
-        # if Kd > 0: # check Tf
-        #     x = self.Tf * self.e
-        #     x = exp((-1.0/self.Tf)*(t-self.t))*x + (-self.Tf*(exp(-1.0/self.Tf)-1))
-        #     derivative = -(1.0/self.Tf**2)*x + (1/self.Tf)*e
-        #     self.e = self.e / -(1.0/self.Tf**2)
-
+        d = 0.0
+        print(self.Tf)
+        if self.Kd > 0.0 and self.Tf > 0.0:
+            Kn = 1.0 / self.Tf
+            x = -Kn * self.Kd * e0
+            # x = e0
+            x = (exp(-Kn*dt) * x
+                 + self.Tf * (1.0-exp(-Kn*dt)) * -Kn**2 *self.Kd * e)
+            d = 1.0 * x + Kn * self.Kd * e
+            d = x
+            # e = x
+            e = -self.Tf * (1.0/self.Kd) * x
 
         self.set_initial_value(t, e, i)
         return clip(p+i+d, self.lower, self.upper)

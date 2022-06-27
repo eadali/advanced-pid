@@ -40,27 +40,28 @@ class TestStringMethods(unittest.TestCase):
 
     def test_set_output_limits(self):
         # Set output limits
-        output_limits = (-4.0, 4.0)
+        lower, upper = -4.0, 4.0
         # Create PID controller and set output limits
         pid = PID(Kp=1.0, Ki=2.0, Kd=3.0, Tf=4.0)
         # Get PID output limits
-        pid.set_output_limits(output_limits=output_limits)
-        _output_limits = pid.get_output_limits()
+        pid.set_output_limits(lower=lower, upper=upper)
+        _lower, _upper = pid.get_output_limits()
         # Check
-        self.assertAlmostEqual(output_limits, _output_limits)
+        self.assertAlmostEqual(lower, _lower)
+        self.assertAlmostEqual(upper, _upper)
 
     def test_set_initial_value(self):
         # Set initial values
-        T0, E0, I0 = 5.0, 6.0, 7.0
+        t0, e0, i0 = 5.0, 6.0, 7.0
         # Create PID controller and set initial values
         pid = PID(Kp=1.0, Ki=2.0, Kd=3.0, Tf=4.0)
-        pid.set_initial_value(T0=T0, E0=E0, I0=I0)
+        pid.set_initial_value(t0=t0, e0=e0, i0=i0)
         # Get PID initial values
         _t, _e, _i = pid.get_initial_value()
         # Check
-        self.assertAlmostEqual(T0, _t)
-        self.assertAlmostEqual(E0, _e)
-        self.assertAlmostEqual(I0, _i)
+        self.assertAlmostEqual(t0, _t)
+        self.assertAlmostEqual(e0, _e)
+        self.assertAlmostEqual(i0, _i)
 
     def test_integrate_only_p(self):
         # Set Kp gain
@@ -152,12 +153,12 @@ class TestStringMethods(unittest.TestCase):
         # Set Ki gain
         Ki = 2.0
         # Set output limits
-        output_limits = (-4.0, 4.0)
+        lower, upper = -4.0, 4.0
         # Set simulation time step
         sim_time, dt = 10, 0.1
         # Create PID controller and set output limits
         pid = PID(Kp=0.0, Ki=Ki, Kd=0.0, Tf=0.05)
-        pid.set_output_limits(output_limits=output_limits)
+        pid.set_output_limits(lower=lower, upper=upper)
         # Create simulation time array, error and output array
         time = arange(0, sim_time, dt)
         error, output = zeros_like(time), zeros_like(time)
@@ -180,7 +181,6 @@ class TestStringMethods(unittest.TestCase):
         from matplotlib import pyplot
         pyplot.plot(integral)
         pyplot.show()
-        lower, upper = output_limits
         self.assertAlmostEqual(lower, output.min())
         self.assertAlmostEqual(upper, output.max())
         self.assertAlmostEqual(lower, integral.min())
