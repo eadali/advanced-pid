@@ -146,18 +146,13 @@ class PID:
 
     def _set_none_value(self, t, e):
         t0, e0, i0 = self.get_initial_value()
-        # Set time to current time, If it is not set
         if t0 is None:
-            self.set_initial_value(t, e0, i0)
-            t0, e0, i0 = self.get_initial_value()
-        # Set derivative filter state to zero, If It is not set
+            t0 = t
         if e0 is None:
-            self.set_initial_value(t0, e, i0)
-            t0, e0, i0 = self.get_initial_value()
-        # Set integral state to zero, If It is not set
+            e0 = e
         if i0 is None:
-            self.set_initial_value(t0, e0, 0.0)
-            t0, e0, i0 = self.get_initial_value()
+            i0 = 0.0
+        self.set_initial_value(t0, e0, i0)
 
     def integrate(self, t, e):
         """Calculates PID controller output.
@@ -182,7 +177,7 @@ class PID:
             msg = """Current timestamp is smaller then previous timestamp.
                      Time step will be accepted as zero."""
             warn(msg, RuntimeWarning)
-
+        # Calculate time step
         dt = t - t0
         # Calculate proportional term
         p = self.Kp * e
