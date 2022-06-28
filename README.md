@@ -1,4 +1,6 @@
 [![Run Tests and Publish PyPI](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml/badge.svg)](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml)
+[![Documentation Status](https://readthedocs.org/projects/advanced-pid/badge/?version=latest)](https://advanced-pid.readthedocs.io/en/latest/?badge=latest)
+
 # advanced-pid    
 An advanced PID controller in Python. The derivative term can also be used in 
 practice thanks to built-in first-order filter. Detailed information can be
