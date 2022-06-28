@@ -1,4 +1,4 @@
-[![tests](https://github.com/eadali/advanced-pid/actions/workflows/python-test.yml/badge.svg)](https://github.com/eadali/advanced-pid/actions/workflows/python-test.yml)
+[![Run Tests and Publish PyPI](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml/badge.svg)](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml)
 # advanced-pid    
 An advanced PID controller in Python. The derivative term can also be used in 
 practice thanks to built-in first-order filter. Detailed information can be
