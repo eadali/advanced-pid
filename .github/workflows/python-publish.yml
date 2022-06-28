@@ -6,7 +6,9 @@ name: Publish PyPI
 on:
   workflow_run:
     workflows: 
-      - "Run Tests"
+      - Run Tests
+    branches:
+      - main
     types: 
       - completed
 
