@@ -36,6 +36,8 @@ advanced-pid package includes a toy mass-spring-damper system model for testing:
 ```python
 from advanced_pid import PID
 from advanced_pid.models import MassSpringDamper
+from matplotlib import pyplot as plt
+from numpy import diff
 
 # Create a mass-spring-damper system model
 system = MassSpringDamper(mass=1.0, spring_const=1.0, damping_const=0.2)
@@ -62,22 +64,22 @@ for i in range(800):
     cont.append(control)
 
 # Plot result
-import matplotlib.pyplot as plt
-plt.subplot(2,1,1)
-plt.title('Mass-Spring-Damper system')
-plt.xlabel('Time[s]')
-plt.ylabel('Measured Position [m]')
-plt.plot(time, meas, 'r')
-plt.grid()
-plt.subplot(2,1,2)
-plt.xlabel('Time [s]')
-plt.ylabel('Force [N]')
-plt.plot(time, cont, 'b')
-plt.grid()
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+fig.suptitle('Mass-Spring-Damper system')
+ax1.set_ylabel('Measured Position [m]')
+ax1.plot(time, meas, 'b')
+ax1.grid()
+ax2.set_ylabel('Force [N]')
+ax2.plot(time, cont, 'g')
+ax2.grid()
+ax3.set_xlabel('Time [s]')
+ax3.set_ylabel('Derivative Term')
+ax3.plot(time[1:], diff(meas)/diff(time), 'r')
+ax3.grid()
 plt.show()
 ```
     
-Output:  
+As It can be seen in the figure, derivative term cannot be use without a filter:  
 ![alt text](https://raw.githubusercontent.com/eadali/advanced-pid/main/docs/imgs/figure.png)
 
 ## Installation
