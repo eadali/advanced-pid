@@ -88,7 +88,7 @@ pip3 install advanced-pid
 ## Tests
 To run tests, run:
 ```
-python3 test.py
+python -m unittest tests.test_pid
 ```
 
 ## License
