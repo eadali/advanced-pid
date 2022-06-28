@@ -177,9 +177,6 @@ class TestStringMethods(unittest.TestCase):
             error[idx] = e
             output[idx] = u
         # Check
-        from matplotlib import pyplot
-        pyplot.plot(integral)
-        pyplot.show()
         lower, upper = output_limits
         self.assertAlmostEqual(lower, output.min())
         self.assertAlmostEqual(upper, output.max())
