@@ -1,3 +1,4 @@
+[![Run Tests and Publish PyPI](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml/badge.svg)](https://github.com/eadali/advanced-pid/actions/workflows/main-branch.yml)
 # advanced-pid    
 An advanced PID controller in Python. The derivative term can also be used in 
 practice thanks to built-in first-order filter. Detailed information can be
@@ -87,7 +88,7 @@ pip3 install advanced-pid
 ## Tests
 To run tests, run:
 ```
-python3 test.py
+python -m unittest tests.test_pid
 ```
 
 ## License

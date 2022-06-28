@@ -7,14 +7,11 @@ Created on Wed Jun 22 20:06:38 2022
 """
 
 from warnings import warn
-from numpy import exp, inf, clip
+from math import exp
 
 
 class PID:
-    """
-    An advanced PID controller with first-order filter on derivative term.
-
-    *Note*: https://www.cds.caltech.edu/~murray/courses/cds101/fa04/caltech/am04_ch8-3nov04.pdf
+    """An advanced PID controller with first-order filter on derivative term.
 
     Parameters
     ----------
@@ -26,7 +23,6 @@ class PID:
         Derivative gain.
     Tf : float
         Time constant of the first-order derivative filter.
-         Derivative term will not be used if the value is not a positive number.
 
     """
 
@@ -47,7 +43,7 @@ class PID:
 
         Returns
         -------
-        u : float
+        float
             Control signal.
         """
         return self.integrate(t, e)
@@ -65,8 +61,7 @@ class PID:
             Derivative gain.
         Tf : float
             Time constant of the first-order derivative filter.
-            Derivative term will not be used if the value is not
-             a positive number.
+
         """
         self.Kp, self.Ki, self.Kd, self.Tf = Kp, Ki, Kd, Tf
 
@@ -75,14 +70,9 @@ class PID:
 
         Returns
         -------
-        Kp : float
-            Proportional gain.
-        Ki: float
-            Integral gain.
-        Kd : float
-            Derivative gain.
-        Tf : float
-            Time constant of the first-order derivative filter.
+        tuple
+            Gains of PID controller (Kp, Ki, Kd, Tf).
+
         """
         return self.Kp, self.Ki, self.Kd, self.Tf
 
@@ -95,23 +85,22 @@ class PID:
             Lower limit for anti-windup,
         upper : flaot or None
             Upper limit for anti-windup.
+
         """
         self.lower, self.upper = lower, upper
-        # If limit is None, set limit to -inf/+inf
         if lower is None:
-            self.lower = -inf
+            self.lower = -float('inf')
         if upper is None:
-            self.upper = +inf
+            self.upper = +float('inf')
 
     def get_output_limits(self):
         """Get PID controller output limits for anti-windup.
 
         Returns
         -------
-        lower : float or None
-            Lower limit for saturation.
-        upper : flaot or None
-            Upper limit for saturation.
+        tuple
+            Output limits (lower, upper).
+
         """
         return self.lower, self.upper
 
@@ -121,29 +110,26 @@ class PID:
         Parameters
         ----------
         t0 : float or None
-            Initial current time. None will reset current time.
+            Initial time. None will reset time.
         e0 : float or None
-            Initial current error. None will reset current error.
+            Initial error. None will reset error.
         i0 : float or None
-            Inital current integral. None will reset current integral.
+            Inital integral. None will reset integral.
         """
-        self.t, self.e, self.i = t0, e0, i0
+        self.t0, self.e0, self.i0 = t0, e0, i0
 
     def get_initial_value(self):
         """Get PID controller states.
 
         Returns
         -------
-        t : float or None
-            Initial current time.
-        e : float or None
-            Initial current error.
-        i : float or None
-            Inital current integral.
+        tuple
+            Initial states of PID controller (t0, e0, i0)
         """
-        return self.t, self.e, self.i
+        return self.t0, self.e0, self.i0
 
-    def _set_none_value(self, t, e):
+    def __set_none_value(self, t, e):
+        """Set None states for first cycle."""
         t0, e0, i0 = self.get_initial_value()
         if t0 is None:
             t0 = t
@@ -152,6 +138,14 @@ class PID:
         if i0 is None:
             i0 = 0.0
         self.set_initial_value(t0, e0, i0)
+
+    def __check_monotonic_timestamp(t0, t):
+        """Check timestamp is monotonic."""
+        if t < t0:
+            msg = 'Current timestamp is smaller than initial timestamp.'
+            warn(msg, RuntimeWarning)
+            return False
+        return True
 
     def integrate(self, t, e):
         """Calculates PID controller output.
@@ -170,20 +164,16 @@ class PID:
         """
         self._set_none_value(t, e)
         t0, e0, i0 = self.get_initial_value()
-        # Check if current time is smaller than previous time
-        if t < t0:
+        # Check monotonic timestamp
+        if not self.__check_monotonic_timestamp(t0, t):
             t0 = t
-            msg = """Current timestamp is smaller then previous timestamp.
-                     Time step will be accepted as zero."""
-            warn(msg, RuntimeWarning)
-
         # Calculate time step
         dt = t - t0
         # Calculate proportional term
         p = self.Kp * e
         # Calculate integral term
         i = i0 + dt * self.Ki * e
-        i = clip(i, self.lower, self.upper)
+        i = min(max(i, self.lower), self.upper)
         # Calcuate derivative term
         d = 0.0
         if self.Kd > 0.0 and self.Tf > 0.0:
@@ -194,4 +184,4 @@ class PID:
             e = -(self.Tf/self.Kd) * x
 
         self.set_initial_value(t, e, i)
-        return clip(p+i+d, self.lower, self.upper)
+        return min(max(p+i+d, self.lower), self.upper)
