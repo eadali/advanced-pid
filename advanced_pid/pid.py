@@ -7,36 +7,29 @@ Created on Wed Jun 22 20:06:38 2022
 """
 
 from warnings import warn
-from advanced_pid.integrate import pid2ss, StateSpace, clip
+from math import exp
 
 
 class PID:
-    """
-    An advanced PID controller with first-order filter on derivative term.
-
-    Solve an equation system :math:`y'(t) = f(y)`.
-
-    *Note*: https://www.cds.caltech.edu/~murray/courses/cds101/fa04/caltech/am04_ch8-3nov04.pdf
+    """An advanced PID controller with first-order filter on derivative term.
 
     Parameters
     ----------
-    Kp, Ki, Kd : float
-        Proportional, Integral and Derivative gain.
+    Kp : float
+        Proportional gain.
+    Ki: float
+        Integral gain.
+    Kd : float
+        Derivative gain.
     Tf : float
         Time constant of the first-order derivative filter.
 
     """
 
     def __init__(self, Kp, Ki, Kd, Tf):
-        # Crate Current time
-        self._t = None
-        # Create error and integral states
-        self._e, self._i = None, None
-        # Create PID gains and output limits
-        self._output_limits = [None, None]
-        # Set PID gains and output limits
         self.set_gains(Kp, Ki, Kd, Tf)
-        self.set_output_limits(self._output_limits)
+        self.set_output_limits(None, None)
+        self.set_initial_value(None, None, None)
 
     def __call__(self, t, e):
         """Call integrate method.
@@ -45,16 +38,14 @@ class PID:
         ----------
         t : float
             Current time.
-
         e : float
-            Error input signal.
+            Error signal.
 
         Returns
         -------
-        u : float
-            Calculated control signal of controller.
+        float
+            Control signal.
         """
-        # Call integrate method
         return self.integrate(t, e)
 
     def set_gains(self, Kp, Ki, Kd, Tf):
@@ -62,115 +53,135 @@ class PID:
 
         Parameters
         ----------
-        Kp, Ki, Kd : float
-            Proportional, Integral and Derivative gain.
+        Kp : float
+            Proportional gain.
+        Ki: float
+            Integral gain.
+        Kd : float
+            Derivative gain.
         Tf : float
             Time constant of the first-order derivative filter.
+
         """
-        if not Tf > 0:
-            raise ValueError('Tf value need to be a positive number.')
-        # Create state-space system and set gains
-        A, B, C, D = pid2ss(Kp, Ki, Kd, Tf)
-        self._ss = StateSpace(A, B, C, D)
-        self._Kp, self._Ki, self._Kd, self._Tf = Kp, Ki, Kd, Tf
+        self.Kp, self.Ki, self.Kd, self.Tf = Kp, Ki, Kd, Tf
 
     def get_gains(self):
         """Get PID controller gains.
 
         Returns
         -------
-        Kp, Ki, Kd : float
-            Proportional, Integral and Derivative gain.
-        """
-        return self._Kp, self._Ki, self._Kd, self._Tf
+        tuple
+            Gains of PID controller (Kp, Ki, Kd, Tf).
 
-    def set_output_limits(self, output_limits):
+        """
+        return self.Kp, self.Ki, self.Kd, self.Tf
+
+    def set_output_limits(self, lower, upper):
         """Set PID controller output limits for anti-windup.
 
         Parameters
         ----------
-        output_limits : array_like (lower_limit, upper_limit)
-            Output limits for anti-windup.
+        lower : float or None
+            Lower limit for anti-windup,
+        upper : flaot or None
+            Upper limit for anti-windup.
+
         """
-        lower, upper = output_limits
-        # If lower limit is None, set lower limit -inf
+        self.lower, self.upper = lower, upper
         if lower is None:
-            self._output_limits[0] = -float("inf")
-        else:
-            self._output_limits[0] = lower
-        # If upper limit is None, set upper limit +inf
+            self.lower = -float('inf')
         if upper is None:
-            self._output_limits[1] = +float("inf")
-        else:
-            self._output_limits[1] = upper
+            self.upper = +float('inf')
 
     def get_output_limits(self):
         """Get PID controller output limits for anti-windup.
 
         Returns
         -------
-        output_limits : array_like (lower_limit, upper_limit)
-            Output limits for anti-windup.
-        """
-        return tuple(self._output_limits)
+        tuple
+            Output limits (lower, upper).
 
-    def set_initial_value(self, T0, E0, I0):
-        """Set PID controller state-space model states.
+        """
+        return self.lower, self.upper
+
+    def set_initial_value(self, t0, e0, i0):
+        """Set PID controller states.
 
         Parameters
         ----------
-        T0 : float or None
-            Initial current time. None will reset timer
-        E0 : float or None
-            Expected error input signal. None will reset derivative state
-        I0 : float or None
-            Integral state of state-space model. None will reset integral state
+        t0 : float or None
+            Initial time. None will reset time.
+        e0 : float or None
+            Initial error. None will reset error.
+        i0 : float or None
+            Inital integral. None will reset integral.
         """
-        self._t, self._e, self._i = T0, E0, I0
+        self.t0, self.e0, self.i0 = t0, e0, i0
 
     def get_initial_value(self):
-        """Set PID controller state-space model states.
+        """Get PID controller states.
 
         Returns
         -------
-        t : float
-            Initial current time.
-        i : float
-            Integral state of state-space model.
-        f : float
-            Derivative filter state of state-space model.
+        tuple
+            Initial states of PID controller (t0, e0, i0)
         """
-        return self._t, self._e, self._i
+        return self.t0, self.e0, self.i0
+
+    def __set_none_value(self, t, e):
+        """Set None states for first cycle."""
+        t0, e0, i0 = self.get_initial_value()
+        if t0 is None:
+            t0 = t
+        if e0 is None:
+            e0 = e
+        if i0 is None:
+            i0 = 0.0
+        self.set_initial_value(t0, e0, i0)
+
+    def __check_monotonic_timestamp(self, t0, t):
+        """Check timestamp is monotonic."""
+        if t < t0:
+            msg = 'Current timestamp is smaller than initial timestamp.'
+            warn(msg, RuntimeWarning)
+            return False
+        return True
 
     def integrate(self, t, e):
-        """Calculates PID controller states and returns output of controller.
+        """Calculates PID controller output.
 
-        Args:
-            u (float): Input value of controller
-            dt (float): Time step used for integral calculations
+        Parameters
+        ----------
+        t : float
+            Current time.
+        e : float
+            Error signal.
+
+        Returns
+        -------
+        u : float
+            Control signal.
         """
-        # Set time to current time, If it is not set
-        if self._t is None:
-            self._t = t
-        # Set derivative filter state to zero, If It is not set
-        if self._e is None:
-            self._e = e
-        # Set integral state to zero, If It is not set
-        if self._i is None:
-            self._i = 0.0
-        # Check if current time is smaller than previous time
-        if t < self._t:
-            t = self._t
-            warn('Current time is smaller then previous time.', RuntimeWarning)
-        f = -(self._Kd/self._Tf) * self._e
-        self._ss.set_initial_value(self._t, [0.0, self._i, f])
-        u, _, i, f = self._ss.integrate(t, e)
-
-        # Calculates proportional term
-        if self._Kd > 0:
-            e = -(self._Tf/self._Kd) * f
-        
-
-        lower, upper = self._output_limits
-        self.set_initial_value(t, e, clip(i, lower, upper))
-        return clip(u, lower, upper)
+        self.__set_none_value(t, e)
+        t0, e0, i0 = self.get_initial_value()
+        # Check monotonic timestamp
+        if not self.__check_monotonic_timestamp(t0, t):
+            t0 = t
+        # Calculate time step
+        dt = t - t0
+        # Calculate proportional term
+        p = self.Kp * e
+        # Calculate integral term
+        i = i0 + dt * self.Ki * e
+        i = min(max(i, self.lower), self.upper)
+        # Calcuate derivative term
+        d = 0.0
+        if self.Kd != 0.0 and self.Tf > 0.0:
+            Kn = 1.0 / self.Tf
+            x = -Kn * self.Kd * e0
+            x = exp(-Kn*dt) * x - Kn * (1.0 - exp(-Kn*dt)) * self.Kd * e
+            d = x + Kn * self.Kd * e
+            e = -(self.Tf/self.Kd) * x
+        # Set initial value for next cycle
+        self.set_initial_value(t, e, i)
+        return min(max(p+i+d, self.lower), self.upper)
