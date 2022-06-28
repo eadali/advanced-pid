@@ -1,22 +1,18 @@
 # This workflow will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Publish PyPI
+name: Run Tests and Publish PyPI
       
 on:
-  workflow_run:
-    workflows: 
-      - Run Tests
+  push:
     branches:
       - main
-    types: 
-      - completed
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  publish:
 
     runs-on: ubuntu-latest
 
@@ -29,8 +25,18 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build
-        pip install -r requirements.txt
+        python -m pip install build
+        python -m pip install flake8
+        python -m pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --statistics
+    - name: Test with unittest
+      run: |
+        python -m unittest tests.test_pid        
     - name: Build package
       run: python -m build
     - name: Publish package
