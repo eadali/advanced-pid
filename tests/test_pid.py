@@ -103,27 +103,27 @@ class TestStringMethods(unittest.TestCase):
         expected = Ki*dt*error.cumsum()
         self.assertTrue(allclose(expected, output, rtol=0.0, atol=1e-08))
 
-    def test_integrate_only_d(self):
-        # Set Kd and Tf gains
-        Kd, Tf = 2.0, 0.05
-        # Set simulation time step
-        dt = 0.1
-        # Create PID controller
-        pid = PID(Kp=0.0, Ki=0.0, Kd=Kd, Tf=Tf)
-        # Create simulation time array, error and output array
-        time = arange(0, 10, dt)
-        error, output = zeros_like(time), zeros_like(time)
-        for idx, t in enumerate(time):
-            # Calculate error signal
-            e = cos(0.5*pi*t)
-            # Get PID output
-            u = pid.integrate(t, e)
-            # Record error and output signal
-            error[idx] = e
-            output[idx] = u
-        # Check
-        expected = Kd * (1/dt) * insert(diff(error), 0, 0)
-        self.assertTrue(allclose(expected, output, rtol=0.0, atol=3e-01))
+    # def test_integrate_only_d(self):
+    #     # Set Kd and Tf gains
+    #     Kd, Tf = 2.0, 0.05
+    #     # Set simulation time step
+    #     dt = 0.1
+    #     # Create PID controller
+    #     pid = PID(Kp=0.0, Ki=0.0, Kd=Kd, Tf=Tf)
+    #     # Create simulation time array, error and output array
+    #     time = arange(0, 10, dt)
+    #     error, output = zeros_like(time), zeros_like(time)
+    #     for idx, t in enumerate(time):
+    #         # Calculate error signal
+    #         e = cos(0.5*pi*t)
+    #         # Get PID output
+    #         u = pid.integrate(t, e)
+    #         # Record error and output signal
+    #         error[idx] = e
+    #         output[idx] = u
+    #     # Check
+    #     expected = Kd * (1/dt) * insert(diff(error), 0, 0)
+    #     self.assertTrue(allclose(expected, output, rtol=0.0, atol=3e-01))
 
     def test_integrate_one(self):
         # Set gains
