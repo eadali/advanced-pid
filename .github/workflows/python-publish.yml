@@ -1,16 +1,13 @@
 # This workflow will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Upload
+name: Publish PyPI
       
 on:
   workflow_run:
-    workflows: 
-      - test
-    branches: 
-      - main
-    types: 
-      - completed      
+    workflows: [Run Tests]
+    types: [completed]
+
 
 permissions:
   contents: read
