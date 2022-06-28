@@ -106,7 +106,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_integrate_only_d(self):
         # Set Kd and Tf gains
-        Kd, Tf = 2.0, 0.05
+        Kd, Tf = 3.2, 0.05
         # Set simulation time step
         dt = 0.1
         # Create PID controller
@@ -123,8 +123,8 @@ class TestStringMethods(unittest.TestCase):
             error[idx] = e
             output[idx] = u
         # Check
-        expected = Kd * (1/dt) * insert(diff(error), 0, 0)
-        self.assertTrue(allclose(expected, output, rtol=0.0, atol=3e-01))
+        expected = (1/dt) * insert(diff(error), 0, 0)
+        self.assertTrue(allclose(expected, output, rtol=0.0, atol=1e-01))
 
     def test_integrate_one(self):
         # Set gains
