@@ -35,6 +35,7 @@ jobs:
       run: python -m build
     - name: Test with unittest
       run: |
+        pip install -r requirements.txt
         python tests/test_pid.py
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
