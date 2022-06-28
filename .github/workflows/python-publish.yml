@@ -9,8 +9,6 @@ on:
       - Run Tests
     types: 
       - completed
-#     branches: [main]
-
 
 permissions:
   contents: read
