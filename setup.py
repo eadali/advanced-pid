@@ -6,21 +6,23 @@ Created on Fri Jun 24 20:51:46 2022
 @author: eadali
 """
 
-from distutils.core import setup
+from setuptools import setup, find_packages
+from codecs import open
+from os import path
+
+
+here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+    
 setup(
   name = 'advanced-pid',
-  packages = ['advanced_pid', 'advanced_pid.integrate', 'advanced_pid.models'],
-  version = '0.0.6',
-  license='MIT',
-  description = 'An advanced PID controller in Python.',
-  long_description='An advanced PID controller in Python. The derivative term can also be used in real applications thanks to built-in first-order filter.',
-  author = 'Erkan ADALI',
-  author_email = 'erkanadali91@gmail.com',
+  version = '0.0.7',
+  long_description=long_description,
+  long_description_content_type='text/markdown',
   url = 'https://github.com/eadali/advanced-pid',
-  project_urls={'Documentation': 'https://advanced-pid.readthedocs.io/',
-                'Source Code': 'https://github.com/eadali/advanced-pid',},
-  keywords = ['control', 'theory', 'engineering', 'pid', 'real', 'time',],
-  install_requires=['numpy',],
+  author = 'eadali',
+  license='MIT',
   classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -28,4 +30,9 @@ setup(
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3',
   ],
+  keywords = ['control theory', 'control', 'theory', 'engineering', 'pid', 'real', 'time',],
+  packages = ['advanced_pid', 'advanced_pid.integrate', 'advanced_pid.models'],
+  install_requires=['numpy',],
+  project_urls={'Documentation': 'https://advanced-pid.readthedocs.io/',
+                'Source Code': 'https://github.com/eadali/advanced-pid',},
 )
