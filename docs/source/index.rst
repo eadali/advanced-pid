@@ -6,30 +6,14 @@
 Welcome to advanced-pid's documentation!
 ========================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 .. mdinclude:: ../../README.md
 
 
 |
-|
-|
 Complete API documentation
 ========================================
 
-advanced_pid.PID module
-------------------------
-
-.. automodule:: advanced_pid.PID
+.. autoclass:: advanced_pid.PID
     :members:
     :undoc-members:
     :show-inheritance:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
