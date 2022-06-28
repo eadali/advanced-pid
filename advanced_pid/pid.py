@@ -186,17 +186,12 @@ class PID:
         i = clip(i, self.lower, self.upper)
         # Calcuate derivative term
         d = 0.0
-        print(self.Tf)
         if self.Kd > 0.0 and self.Tf > 0.0:
             Kn = 1.0 / self.Tf
             x = -Kn * self.Kd * e0
-            # x = e0
-            x = (exp(-Kn*dt) * x
-                 + self.Tf * (1.0-exp(-Kn*dt)) * -Kn**2 *self.Kd * e)
-            d = 1.0 * x + Kn * self.Kd * e
-            d = x
-            # e = x
-            e = -self.Tf * (1.0/self.Kd) * x
+            x = exp(-Kn*dt) * x - Kn * (1.0 - exp(-Kn*dt)) * self.Kd * e
+            d = x + Kn * self.Kd * e
+            e = -(self.Tf/self.Kd) * x
 
         self.set_initial_value(t, e, i)
         return clip(p+i+d, self.lower, self.upper)
