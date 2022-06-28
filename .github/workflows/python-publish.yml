@@ -3,13 +3,14 @@
 
 name: Publish PyPI
       
-# on:
-#   workflow_run:
-#     workflows: [Run Tests]
-#     types: [completed]
+on:
+  workflow_run:
+    workflows: 
+      - Run Tests
+    types: 
+      - completed
 #     branches: [main]
 
-on: push
 
 permissions:
   contents: read
