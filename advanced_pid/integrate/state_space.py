@@ -27,39 +27,6 @@ def asarray(x):
     return array(x)
 
 
-def pid2ss(Kp, Ki, Kd, Tf):
-    """Convert PID gains to state-space form.
-
-    Parameters
-    ----------
-    Kp, Ki, Kd : float
-        Proportional, Integral and Derivative gain.
-    Tf : float
-        Time constant of the first-order derivative filter.
-
-    Returns
-    -------
-    A, B, C, D : ndarray
-        State space representation of the system, in observable canonical form.
-    """
-    Kn = 1.0 / Tf
-    A = array([[0.0, 0.0, 0.0],
-               [0.0, 0.0, 0.0],
-               [0.0, 0.0, -Kn]])
-    B = array([[0.0, ],
-               [Ki, ],
-               [-Kd*Kn*Kn, ]])
-    C = array([[0.0, 1.0, 1.0],
-               [1.0, 0.0, 0.0],
-               [0.0, 1.0, 0.0],
-               [0.0, 0.0, 1.0]])
-    D = array([[Kp+Kd*Kn, ],
-               [0.0, ],
-               [0.0, ],
-               [0.0, ]])
-    return A, B, C, D
-
-
 def RK4(fun, t_span, y0, n):
     """Explicit Runge-Kutta method of order 4.
 
