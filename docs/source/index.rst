@@ -15,5 +15,5 @@ Complete API documentation
 
 .. autoclass:: advanced_pid.PID
     :members:
+    :special-members: __call__
     :undoc-members:
-    :show-inheritance:
