@@ -181,7 +181,7 @@ class PID:
             x = -Kn * self.Kd * e0
             x = exp(-Kn*dt) * x - Kn * (1.0 - exp(-Kn*dt)) * self.Kd * e
             d = x + Kn * self.Kd * e
-            e = -(1.0/(Kn*self.Kd)) * x
+            e = -(self.Tf/self.Kd) * x
         # Set initial value for next cycle
         self.set_initial_value(t, e, i)
         return min(max(p+i+d, self.lower), self.upper)
