@@ -7,7 +7,6 @@ Created on Fri Jun 24 15:10:31 2022
 """
 
 from numpy import zeros, random, isscalar, array
-from advanced_pid.integrate import RK4
 
 
 def asarray(x):
