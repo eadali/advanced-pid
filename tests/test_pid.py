@@ -5,8 +5,9 @@ Created on Mon Jun 20 19:45:34 2022
 
 @author: eadali
 """
- 
-from numpy import sin, cos, arange, pi, zeros_like, allclose, diff, insert
+
+from numpy import arange, zeros_like, allclose, diff, insert
+from math import sin, cos, pi
 from advanced_pid import PID
 import unittest
 
