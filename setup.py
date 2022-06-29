@@ -17,7 +17,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     
 setup(
   name = 'advanced-pid',
-  version = '0.0.7',
+  version = '0.0.8',
   long_description=long_description,
   long_description_content_type='text/markdown',
   url = 'https://github.com/eadali/advanced-pid',
