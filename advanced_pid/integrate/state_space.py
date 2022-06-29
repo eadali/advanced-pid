@@ -6,7 +6,7 @@ Created on Mon Jun 20 16:08:06 2022
 @author: eadali
 """
 
-from numpy import isscalar, array, zeros, clip
+from numpy import isscalar, array, zeros
 
 
 def asarray(x):
