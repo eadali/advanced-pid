@@ -6,73 +6,11 @@ Created on Fri Jun 24 15:10:31 2022
 @author: eadali
 """
 
-from numpy import zeros, isscalar, array
 import random
 
 
-def asarray(x):
-    """Convert the input to an array.
-
-    Parameters
-    ----------
-    x : array_like
-        Input data, in any form that can be converted to an array.
-
-    Returns
-    -------
-    out : ndarray
-        Array interpretation of x
-    """
-    if isscalar(x):
-        x = [x]
-    return array(x)
-
-
-def RK4(fun, t_span, y0, n):
-    """Explicit Runge-Kutta method of order 4.
-
-    Parameters
-    ----------
-    fun : callable
-        Right-hand side of the system. The calling signature is fun(t, y).
-    t_span : array_like
-        Interval of integration (t0, tf).
-    y0 : array_like
-        Initial state.
-    n : int
-        Number of integration steps.
-
-    Returns
-    -------
-    t : float
-        Integration end time.
-    y : ndarray
-        The integrated value at t
-    """
-    # Integration initial and final time
-    t0, tf = t_span
-    t, y = t0, asarray(y0)
-    # Calculate step-size
-    h = (tf - t0) / n
-    for i in range(n):
-        # Calculate slopes
-        k1 = asarray(fun(t,         y))
-        k2 = asarray(fun(t+(h/2.0), y + h * (k1/2.0)))
-        k3 = asarray(fun(t+(h/2.0), y + h * (k2/2.0)))
-        k4 = asarray(fun(t+h,       y + h * k3))
-        # Update time and states
-        t = t + h
-        y = y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
-    return t, y
-
-
 class MassSpringDamper:
-    r"""
-    A mass-spring-damper model.
-
-    Solve a differential equation :math:`m\ddot{x} = -kx - b\dot{x} - u`
-
-    *Note*: https://en.wikipedia.org/wiki/Mass-spring-damper_model
+    """A mass-spring-damper model.
 
     Parameters
     ----------
@@ -95,7 +33,7 @@ class MassSpringDamper:
         self.damping_const = damping_const
         self.noise_std = noise_std
         # Set initial values
-        self.states = zeros(2)
+        self.states = [0.0, 0.0]
         # Set input
         self.external_force = 0.0
 
@@ -139,18 +77,16 @@ class MassSpringDamper:
 
         Returns
         -------
-        measurement_time : float
-            Measurement timestamp.
-        measured_position : float
-            Measured position of mass.
+        tuple:
+            Timestamp and measured position (timestamp, measured_position).
+
         """
         # Update measurement time
         self.measurement_time = self.measurement_time + self.time_step
         # Solve ordinary differential equation for current states
-        _, self.states = RK4(self._state_equation,
-                             (0.0, self.time_step),
-                             self.states,
-                             10)
+        dxdt = self._state_equation(0, self.states)
+        self.states[0] = self.states[0] + dxdt[0] * self.time_step
+        self.states[1] = self.states[1] + dxdt[1] * self.time_step
         position = self.states[0]
         noise = random.gauss(0, self.noise_std)
         measured_position = position + noise

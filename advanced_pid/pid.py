@@ -45,6 +45,7 @@ class PID:
         -------
         float
             Control signal.
+
         """
         return self.integrate(t, e)
 
@@ -115,6 +116,7 @@ class PID:
             Initial error. None will reset error.
         i0 : float or None
             Inital integral. None will reset integral.
+
         """
         self.t0, self.e0, self.i0 = t0, e0, i0
 
@@ -125,6 +127,7 @@ class PID:
         -------
         tuple
             Initial states of PID controller (t0, e0, i0)
+
         """
         return self.t0, self.e0, self.i0
 
@@ -161,6 +164,7 @@ class PID:
         -------
         float
             Control signal.
+
         """
         self.__set_none_value(t, e)
         t0, e0, i0 = self.get_initial_value()
