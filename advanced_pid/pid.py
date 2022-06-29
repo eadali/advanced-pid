@@ -159,7 +159,7 @@ class PID:
 
         Returns
         -------
-        u : float
+        float
             Control signal.
         """
         self.__set_none_value(t, e)
