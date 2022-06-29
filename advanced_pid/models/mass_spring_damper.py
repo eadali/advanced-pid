@@ -6,7 +6,8 @@ Created on Fri Jun 24 15:10:31 2022
 @author: eadali
 """
 
-from numpy import zeros, random, isscalar, array
+from numpy import zeros, isscalar, array
+import random
 
 
 def asarray(x):
@@ -63,6 +64,7 @@ def RK4(fun, t_span, y0, n):
         t = t + h
         y = y + (1.0/6.0) * h * (k1 + 2*k2 + 2*k3 + k4)
     return t, y
+
 
 class MassSpringDamper:
     r"""
@@ -150,6 +152,6 @@ class MassSpringDamper:
                              self.states,
                              10)
         position = self.states[0]
-        noise = random.normal(scale=self.noise_std)
+        noise = random.gauss(0, self.noise_std)
         measured_position = position + noise
         return self.measurement_time, measured_position
