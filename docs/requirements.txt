@@ -1,2 +1,1 @@
-numpy
 m2r2

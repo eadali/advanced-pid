@@ -32,7 +32,6 @@ setup(
   ],
   keywords = ['control theory', 'control', 'theory', 'engineering', 'pid', 'real', 'time',],
   packages = ['advanced_pid', 'advanced_pid.models'],
-  install_requires=['numpy',],
   project_urls={'Documentation': 'https://advanced-pid.readthedocs.io/',
                 'Source Code': 'https://github.com/eadali/advanced-pid',},
 )
