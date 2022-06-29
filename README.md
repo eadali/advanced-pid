@@ -21,7 +21,8 @@ while True:
     
     # Calculate control signal by using PID controller
     reference = 1.0
-    control = pid(timestamp, reference - measurement)
+    error = reference - measurement
+    control = pid(timestamp, error)
     
     # Feed control signal to system
     system.set_input(control)
